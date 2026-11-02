@@ -33,11 +33,19 @@ jobs:
       - name: Configure Android SDK
         run: |
           SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit)
+          if [ -z "$SDKMANAGER" ]; then
+            echo "Android SDK manager not found"
+            exit 1
+          fi
           yes | "$SDKMANAGER" --licenses || true
           "$SDKMANAGER" --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Extract project ZIP
         run: unzip -o LumioCinematicLauncher_CloudBuild.zip -d .
+
+      - name: Fix Kotlin package name
+        run: |
+          find LumioCinematicLauncher/app -type f \( -name '*.kt' -o -name '*.xml' -o -name '*.gradle' \) -exec sed -i 's/in\.lumio\.cinematiclauncher/com.lumio.cinematiclauncher/g' {} +
 
       - name: Set Java compatibility to 17
         run: |
