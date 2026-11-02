@@ -30,24 +30,18 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Find and configure Android SDK
+      - name: Configure Android SDK
         run: |
-          echo "Searching for Android SDK..."
-          ls -la "$ANDROID_HOME/cmdline-tools"
-
           SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit)
-
-          if [ -z "$SDKMANAGER" ]; then
-            echo "ERROR: sdkmanager not found"
-            exit 1
-          fi
-
-          echo "Found: $SDKMANAGER"
           yes | "$SDKMANAGER" --licenses || true
           "$SDKMANAGER" --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Extract project ZIP
         run: unzip -o LumioCinematicLauncher_CloudBuild.zip -d .
+
+      - name: Set Java compatibility to 17
+        run: |
+          sed -i '/    kotlinOptions/i\    compileOptions {\n        sourceCompatibility JavaVersion.VERSION_17\n        targetCompatibility JavaVersion.VERSION_17\n    }\n' LumioCinematicLauncher/app/build.gradle
 
       - name: Build APK
         run: gradle -p LumioCinematicLauncher assembleDebug
