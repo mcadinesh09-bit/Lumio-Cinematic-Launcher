@@ -32,20 +32,15 @@ jobs:
 
       - name: Locate Android SDK
         run: |
-          echo "ANDROID_HOME=${ANDROID_HOME:-$ANDROID_SDK_ROOT}" >> $GITHUB_ENV
           SDK_ROOT="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
           echo "Android SDK: $SDK_ROOT"
-          find "$SDK_ROOT/cmdline-tools" -name sdkmanager -type f
+          echo "ANDROID_HOME=$SDK_ROOT" >> $GITHUB_ENV
+          SDKMANAGER=$(find "$SDK_ROOT/cmdline-tools" -name sdkmanager -type f | head -n 1)
+          echo "SDKMANAGER=$SDKMANAGER" >> $GITHUB_ENV
+          "$SDKMANAGER" --version
 
       - name: Install Android SDK 35
         run: |
-          SDK_ROOT="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
-          SDKMANAGER=$(find "$SDK_ROOT/cmdline-tools" -name sdkmanager -type f | head -n 1)
-          if [ -z "$SDKMANAGER" ]; then
-            echo "sdkmanager not found"
-            exit 1
-          fi
-          chmod +x "$SDKMANAGER"
           yes | "$SDKMANAGER" --licenses || true
           "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
 
